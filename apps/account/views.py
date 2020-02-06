@@ -26,7 +26,7 @@ class Login(Resource):
             if data is not None:
                 session['logged_in'] = True
                 try:
-                    db.query(User).update({'last_login': datetime.now()})
+                    db.query(User).filter_by(username=args['username']).update({'last_login': datetime.now()})
                     db.commit()
                 except:
                     db.rollback()
