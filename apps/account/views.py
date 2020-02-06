@@ -1,6 +1,8 @@
 from flask import Flask, Blueprint, session, redirect, url_for
 from flask_restful import Resource, Api, reqparse
 from models.user import User
+from models.database import get_session
+from datetime import datetime
 
 account = Blueprint('views', __name__)
 api = Api()
@@ -19,9 +21,15 @@ class Login(Resource):
         args = parser.parse_args()
 
         try:
-            data = User.query.filter_by(username=args['username'], password=args['password']).first()
+            db = get_session('flask-jwt-auth')
+            data = db.query(User).filter_by(username=args['username'], password=args['password']).first()
             if data is not None:
                 session['logged_in'] = True
+                try:
+                    db.query(User).update({'last_login': datetime.now()})
+                    db.commit()
+                except:
+                    db.rollback()
 
             return redirect(url_for('hello'))
         except Exception as e:
