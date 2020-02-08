@@ -22,16 +22,16 @@ class Login(Resource):
 
         try:
             db = get_session('flask-jwt-auth')
-            data = db.query(User).filter_by(username=args['username'], password=args['password']).first()
+            data = db.query(User).filter_by(username=args['username']).first()
             if data is not None:
-                session['logged_in'] = True
-                try:
-                    db.query(User).filter_by(username=args['username']).update({'last_login': datetime.now()})
-                    db.commit()
-                except:
-                    db.rollback()
-
-            return redirect(url_for('hello'))
+                if data.check_password(args['password']):
+                    session['logged_in'] = True
+                    try:
+                        db.query(User).filter_by(username=args['username']).update({'last_login': datetime.now()})
+                        db.commit()
+                    except:
+                        db.rollback()
+                return redirect(url_for('hello'))
         except Exception as e:
             return {'error': str(e)}
 
