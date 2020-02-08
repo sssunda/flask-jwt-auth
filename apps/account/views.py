@@ -1,7 +1,7 @@
 from flask import Flask, Blueprint, session, redirect, url_for
 from flask_restful import Resource, Api, reqparse
-from models.user import User
-from models.database import get_session
+from apps.models.user import User
+from apps.models.database import get_session
 from datetime import datetime
 
 account = Blueprint('views', __name__)
