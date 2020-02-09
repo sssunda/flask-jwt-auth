@@ -15,10 +15,6 @@ def create_app():
 
     @app.route("/")
     def hello():
-        try:
-            if session['logged_in']:
-                return "Success Login"
-        except:
-            return "Hello, World! Please Login!"
+        return "Hello, World!"
 
     return app

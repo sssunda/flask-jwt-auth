@@ -1,7 +1,8 @@
-from flask import Flask, Blueprint, session, redirect, url_for
+from flask import Flask, Blueprint, session, redirect, url_for, jsonify, make_response
 from flask_restful import Resource, Api, reqparse
 from apps.models.user import User
 from apps.models.database import get_session
+from apps.jwt.views import encrypt_jwt
 from datetime import datetime
 
 account = Blueprint('views', __name__)
@@ -25,13 +26,16 @@ class Login(Resource):
             data = db.query(User).filter_by(username=args['username']).first()
             if data is not None:
                 if data.check_password(args['password']):
-                    session['logged_in'] = True
+                    access_token = encrypt_jwt(args['username'])
                     try:
                         db.query(User).filter_by(username=args['username']).update({'last_login': datetime.now()})
                         db.commit()
                     except:
                         db.rollback()
-                return redirect(url_for('hello'))
+                    return make_response(jsonify({
+                        'msg': 'Success!',
+                        'access_token': access_token
+                    }), 200)
         except Exception as e:
             return {'error': str(e)}
 
