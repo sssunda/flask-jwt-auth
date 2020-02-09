@@ -2,11 +2,13 @@ alembic==1.3.3
 aniso8601==8.0.0
 Click==7.0
 Flask==1.1.1
+-e git+https://github.com/sssunda/flask-jwt-auth.git@dbf266679c5bf47cf724d398530ec1f3bca92ff4#egg=flask_jwt_auth
 Flask-RESTful==0.3.7
 itsdangerous==1.1.0
 Jinja2==2.11.0
 Mako==1.1.1
 MarkupSafe==1.1.1
+PyJWT==1.7.1
 python-dateutil==2.8.1
 python-editor==1.0.4
 pytz==2019.3
