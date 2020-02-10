@@ -3,6 +3,7 @@ from flask_restful import Resource, Api, reqparse
 from apps.models.user import User
 from apps.models.database import get_session
 from apps.jwt.views import encrypt_jwt
+from apps.decorators.jwt_auth import jwt_token_required
 from datetime import datetime
 
 account = Blueprint('views', __name__)
@@ -39,5 +40,23 @@ class Login(Resource):
         except Exception as e:
             return {'error': str(e)}
 
+class Me(Resource):
+    @jwt_token_required
+    def get(self, **kwargs):
+        auth_user = kwargs['auth_user']
+        data = {
+            'id' : auth_user.id,
+            'username' : auth_user.username,
+            'email': auth_user.email,
+            'created_on': auth_user.created_on,
+            'token_iat': kwargs['jwt_iat'],
+            'token_exp': kwargs['jwt_exp']
+        }
+        return make_response(jsonify({
+            'msg': 'Success!',
+            'data': data
+        }), 200)
 
-api.add_resource(Login,'/login')
+
+api.add_resource(Login, '/login')
+api.add_resource(Me, '/me')
