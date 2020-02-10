@@ -1,6 +1,6 @@
 from flask import Flask, session
 from apps.models.database import init_db, init_create_user
-from apps.account.views import account, api
+from apps.auth.views import auth, api
 
 
 def create_app():
@@ -8,8 +8,8 @@ def create_app():
     init_db()
     # create test_user
     # init_create_user()
-    api.init_app(account)
-    app.register_blueprint(account, url_prefix='/account')
+    api.init_app(auth)
+    app.register_blueprint(auth, url_prefix='/auth')
     app.secret_key = 'super secret key'
 
 

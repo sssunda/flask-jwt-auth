@@ -6,7 +6,7 @@ from apps.jwt.views import encrypt_jwt
 from apps.decorators.jwt_auth import jwt_token_required
 from datetime import datetime
 
-account = Blueprint('views', __name__)
+auth = Blueprint('views', __name__)
 api = Api()
 
 
