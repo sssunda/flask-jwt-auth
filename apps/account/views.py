@@ -57,6 +57,16 @@ class Me(Resource):
             'data': data
         }), 200)
 
+class Refresh(Resource):
+    @jwt_token_required
+    def get(self, **kwargs):
+        new_token = encrypt_jwt(kwargs['jwt_username'])
+        print(new_token)
+        return make_response(jsonify({
+            'msg': 'Success!',
+            'access_token': new_token
+        }))
 
 api.add_resource(Login, '/login')
 api.add_resource(Me, '/me')
+api.add_resource(Refresh, '/refresh')
