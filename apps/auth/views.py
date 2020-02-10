@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint, session, redirect, url_for, jsonify, make_response
+from flask import Blueprint, jsonify, make_response
 from flask_restful import Resource, Api, reqparse
 from apps.models.user import User
 from apps.models.database import get_session
