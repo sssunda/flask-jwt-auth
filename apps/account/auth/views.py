@@ -1,14 +1,14 @@
 from flask import Blueprint, jsonify, make_response
-from flask_restful import Resource, Api, reqparse
+from flask_restful import Resource, reqparse
 from apps.models.user import User
 from apps.models.database import get_session
 from apps.jwt.views import encrypt_jwt
 from apps.decorators.jwt_auth import jwt_token_required
+from apps.account.views import api
 from datetime import datetime
 
-auth = Blueprint('views', __name__)
-api = Api()
 
+auth = Blueprint('auth', __name__)
 
 class Login(Resource):
     def get(self):

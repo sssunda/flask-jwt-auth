@@ -1,2 +1,4 @@
-from flask import
+from flask_restful import Api
 
+
+api = Api()
