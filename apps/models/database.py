@@ -17,22 +17,22 @@ def init_db():
     Base.metadata.create_all(engine)
 
 def get_session(db_name):
-    session = db_sessions.get(db_name)
-    if session is None:
+    db = db_sessions.get(db_name)
+    if db is None:
         return 'Error'
-    return session
+    return db
 
 def init_create_user():
-    session = get_session('flask-jwt-auth')
+    db = get_session('flask-jwt-auth')
     try:
         user = User(
             username='test_user_1',
             password='test',
             email='test@test.com'
         )
-        session.add(user)
-        session.commit()
+        db.add(user)
+        db.commit()
     except Exception as e:
         print(e)
-        session.rollback()
+        db.rollback()
 

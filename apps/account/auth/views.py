@@ -4,7 +4,7 @@ from apps.models.user import User
 from apps.models.database import get_session
 from apps.jwt.views import encrypt_jwt
 from apps.decorators.jwt_auth import jwt_token_required
-from apps.account.views import api
+from apps.account.views import api, login_parser
 from datetime import datetime
 
 
@@ -17,9 +17,7 @@ class Login(Resource):
         except Exception as e:
             return {'error': str(e)}
     def post(self):
-        parser = reqparse.RequestParser()
-        parser.add_argument('username', required=True)
-        parser.add_argument('password', required=True)
+        parser = login_parser
         args = parser.parse_args()
 
         try:

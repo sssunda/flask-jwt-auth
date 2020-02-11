@@ -42,8 +42,6 @@ def jwt_token_required(f):
         kwargs['jwt_exp'] = exp
         kwargs['jwt_iat'] = decoded_token['iat']
         kwargs['auth_user'] = auth_user
-        print(kwargs)
-
 
         return f(*args, **kwargs)
     return decorated_function

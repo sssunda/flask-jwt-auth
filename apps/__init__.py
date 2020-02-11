@@ -1,4 +1,4 @@
-from flask import Flask, session
+from flask import Flask
 from apps.models.database import init_db, init_create_user
 from apps.account.views import api
 from apps.account.auth.views import auth
