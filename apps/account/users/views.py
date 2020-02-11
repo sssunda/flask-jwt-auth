@@ -4,6 +4,8 @@ from apps.decorators.jwt_auth import jwt_token_required
 from apps.account.views import api, create_parser
 from apps.models.user import User
 from apps.models.database import get_session
+from apps.utils.validate import check_username, check_password, check_email
+
 
 users = Blueprint('users', __name__)
 
@@ -33,13 +35,41 @@ class Home(Resource):
 
         try:
             db = get_session('flask-jwt-auth')
+            if db.query(User).filter_by(username=args['username']).first():
+                return jsonify({
+                    'msg': 'Already existed username'
+                })
+            
+            if db.query(User).filter_by(email=args['email']).first():
+                return jsonify({
+                    'msg': 'Already existed email'
+                })
+
+            is_valid, err_msg = check_username(args['username'])
+            if not is_valid:
+                return jsonify({
+                    'msg': err_msg
+                })
+
+            is_valid, err_msg = check_password(args['password'], args['password_confirmed'])
+            if not is_valid:
+                return jsonify({
+                    'msg': err_msg
+                })
+
+            is_valid, err_msg = check_email(args['email'])
+            if not is_valid:
+                return jsonify({
+                    'msg': err_msg
+                })
+
             user = User(
                 username=args['username'],
                 password=args['password'],
                 email=args['email']
             )
             db.add(user)
-
+            print('add')
         except Except as e:
             print(e)
             return db.rollback()
@@ -47,8 +77,8 @@ class Home(Resource):
         db.commit()
         new_user = db.query(User).filter_by(username=args['username']).first()
         data = {
-            'id' : new_user.id,
-            'username' : new_user.username,
+            'id': new_user.id,
+            'username': new_user.username,
             'email': new_user.email,
             'created_on': new_user.created_on
             }
