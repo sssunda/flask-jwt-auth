@@ -157,6 +157,23 @@ class Username(Resource):
             'data': data
         })
 
+    @jwt_token_required
+    def delete(self, username, **kwargs):
+        try:
+            db = get_session('flask-jwt-auth')
+            db.query(User).filter_by(username=username).delete()
+            db.commit()
+        except:
+            db.rollback()
+            return jsonify({
+                'msg': 'Error while deleting user {}'.format(username)
+            })
+
+        return jsonify({
+            'msg': 'success. delete uesr {}'.format(username)
+        })
+
+
 
 
 
