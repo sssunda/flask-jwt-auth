@@ -12,6 +12,11 @@ users = Blueprint('users', __name__)
 class Home(Resource):
     @jwt_token_required
     def get(self, **kwargs):
+        auth_user = kwargs['auth_user']
+        if not auth_user.is_staff:
+            return jsonify({
+                'msg': 'Not Permission. Only Staff'
+            })
         db = get_session('flask-jwt-auth')
         user_list = db.query(User).all()
 
@@ -90,35 +95,40 @@ class Home(Resource):
 class Username(Resource):
     @jwt_token_required
     def get(self, username, **kwargs):
-        db = get_session('flask-jwt-auth')
-        user = db.query(User).filter_by(username=username).first()
+        auth_user = kwargs['auth_user']
+        if auth_user.is_staff or kwargs['jwt_username'] == username:
+            db = get_session('flask-jwt-auth')
+            user = db.query(User).filter_by(username=username).first()
 
-        if user:
-            auth_user = user
-            data = {
-                'id': auth_user.id,
-                'username': auth_user.username,
-                'email': auth_user.email,
-                'created_on': auth_user.created_on,
-                'last_login': auth_user.last_login
-            }
-            return jsonify({
-                'msg': 'success',
-                'data': data
-            })
-        else:
-            return jsonify({
-                'msg': 'No entry for username.{}'.format(username)
-            })
+            if user:
+                auth_user = user
+                data = {
+                    'id': auth_user.id,
+                    'username': auth_user.username,
+                    'email': auth_user.email,
+                    'created_on': auth_user.created_on,
+                    'last_login': auth_user.last_login
+                }
+                return jsonify({
+                    'msg': 'success',
+                    'data': data
+                })
+            else:
+                return jsonify({
+                    'msg': 'No entry for username.{}'.format(username)
+                })
+        return jsonify({
+            'msg': 'Not Permission'
+        })
 
     @jwt_token_required
     def put(self, username, **kwargs):
+        auth_user = kwargs['auth_user']
         parser = update_parser
         args = parser.parse_args()
-        print(args)
-        if kwargs['jwt_username'] != username:
+        if kwargs['jwt_username'] != username or not auth_user.is_staff:
             return jsonify({
-                'msg': "Not your id"
+                'msg': 'Not Permission'
             })
         try:
             db = get_session('flask-jwt-auth')
@@ -159,6 +169,11 @@ class Username(Resource):
 
     @jwt_token_required
     def delete(self, username, **kwargs):
+        auth_user = kwargs['auth_user']
+        if kwargs['jwt_username'] != username or not auth_user.is_staff:
+            return jsonify({
+                'msg': 'Not Permission'
+            })
         try:
             db = get_session('flask-jwt-auth')
             db.query(User).filter_by(username=username).delete()
