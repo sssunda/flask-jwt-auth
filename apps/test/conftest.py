@@ -1,6 +1,5 @@
 import pytest
 import tempfile
-import json
 from apps import create_app
 from apps.models.database import init_db
 
