@@ -1,15 +1,17 @@
-from flask import Blueprint, jsonify, make_response
-from flask_restful import Resource, reqparse
+from flask import jsonify, make_response
+from flask_restplus import Resource, reqparse
 from apps.models.user import User
 from apps.models.database import get_session
 from apps.jwt.views import encrypt_jwt
 from apps.decorators.jwt_auth import jwt_token_required
 from apps.account.views import api, login_parser
 from datetime import datetime
+from apps.account.views import api
 
 
-auth = Blueprint('auth', __name__)
+ns_auth = api.namespace('auth')
 
+@ns_auth.route('/login')
 class Login(Resource):
     def get(self):
         try:
@@ -38,6 +40,8 @@ class Login(Resource):
         except Exception as e:
             return {'error': str(e)}
 
+
+@ns_auth.route('/me')
 class Me(Resource):
     @jwt_token_required
     def get(self, **kwargs):
@@ -55,6 +59,8 @@ class Me(Resource):
             'data': data
         }), 200)
 
+
+@ns_auth.route('/refresh')
 class Refresh(Resource):
     @jwt_token_required
     def get(self, **kwargs):
@@ -64,7 +70,3 @@ class Refresh(Resource):
             'msg': 'Success!',
             'access_token': new_token
         }))
-
-api.add_resource(Login, '/login')
-api.add_resource(Me, '/me')
-api.add_resource(Refresh, '/refresh')

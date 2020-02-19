@@ -1,4 +1,4 @@
-from flask_restful import Api, reqparse
+from flask_restplus import Api, reqparse
 
 
 api = Api()
