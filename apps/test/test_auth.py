@@ -15,14 +15,14 @@ def test_login(client):
     assert resp.status_code == 200
 
     # check access_token
-    access_token = json.loads(resp.data.decode("utf-8"))['access_token']
+    access_token = json.loads(resp.data.decode("utf-8"))['data']['access_token']
     assert access_token
 
 
 def test_me(client):
     # test login and get access_token
     resp = client.post("/auth/login", json=test_user)
-    access_token = json.loads(resp.data.decode("utf-8"))['access_token']
+    access_token = json.loads(resp.data.decode("utf-8"))['data']['access_token']
     assert access_token
 
     # test me
@@ -39,7 +39,7 @@ def test_me(client):
 def test_refresh(client):
     # test login and get access_token
     resp = client.post("/auth/login", json=test_user)
-    access_token = json.loads(resp.data.decode("utf-8"))['access_token']
+    access_token = json.loads(resp.data.decode("utf-8"))['data']['access_token']
     assert access_token
 
     # test refresh
@@ -48,7 +48,7 @@ def test_refresh(client):
     })
     assert resp.status_code == 200
 
-    new_access_token = json.loads(resp.data.decode("utf-8"))['access_token']
+    new_access_token = json.loads(resp.data.decode("utf-8"))['data']['access_token']
     assert new_access_token
 
     # access_toekn compare with new_access_token

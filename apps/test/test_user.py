@@ -2,7 +2,7 @@ import pytest
 import tempfile
 import json
 from apps.test.conftest import client
-
+from apps.utils.status_code import SUCCESS_OK, ERROR_BAD_REQUEST, ERROR_UNAUTHORIZED
 
 test_user_success_one = {
     'username': 'testuser',
@@ -41,47 +41,48 @@ def test_create_delete(client):
     # test delete user
 
     resp = client.post("/users", json=test_user_success_one)
-    assert resp.status_code == 200
+    assert resp.status_code == SUCCESS_OK
 
     resp = client.post("/users", json=test_user_success_two)
-    assert resp.status_code == 200
+    assert resp.status_code == SUCCESS_OK
 
     resp = client.post("/users", json=test_uesr_fail)
-    assert resp.status_code == 401
+    assert resp.status_code == ERROR_BAD_REQUEST
 
     resp = client.post("/auth/login", json=test_user_success_one)
-    access_token = json.loads(resp.data.decode("utf-8"))['access_token']
+    access_token = json.loads(resp.data.decode("utf-8"))['data']['access_token']
     resp = client.delete("/users/" + test_user_success_one['username'],
                          headers={'Authorization': access_token})
-    assert resp.status_code == 200
+    assert resp.status_code == SUCCESS_OK
 
+    # deleted user, unauthourized
     resp = client.delete("/users/" + test_user_success_one['username'],
                          headers={'Authorization': access_token})
-    assert resp.status_code == 401
+    assert resp.status_code == ERROR_UNAUTHORIZED
 
 
 def test_get_userinfo(client):
     # test get user info
 
     resp = client.post("/auth/login", json=test_staff_user)
-    access_token = json.loads(resp.data.decode("utf-8"))['access_token']
+    access_token = json.loads(resp.data.decode("utf-8"))['data']['access_token']
     resp = client.get("/users", headers={
         "Authorization": access_token
     })
-    assert resp.status_code == 200
+    assert resp.status_code == SUCCESS_OK
 
     resp = client.post("/auth/login", json=test_is_not_staff_user)
-    access_token = json.loads(resp.data.decode("utf-8"))['access_token']
+    access_token = json.loads(resp.data.decode("utf-8"))['data']['access_token']
     resp = client.get("/users", headers={
         "Authorization": access_token
     })
-    assert resp.status_code == 401
+    assert resp.status_code == ERROR_BAD_REQUEST
 
     resp = client.post("/auth/login", json=test_staff_user)
-    access_token = json.loads(resp.data.decode("utf-8"))['access_token']
+    access_token = json.loads(resp.data.decode("utf-8"))['data']['access_token']
     resp = client.get("/users/" + test_staff_user['username'],
                       headers={'Authorization': access_token})
-    assert resp.status_code == 200
+    assert resp.status_code == SUCCESS_OK
 
 
 def test_update_userinfo(client):
@@ -92,19 +93,19 @@ def test_update_userinfo(client):
     test_user_success_two['email'] = 'testsuccessuser@test.com'
 
     resp = client.post("/auth/login", json=test_staff_user)
-    access_token = json.loads(resp.data.decode("utf-8"))['access_token']
+    access_token = json.loads(resp.data.decode("utf-8"))['data']['access_token']
     resp = client.put("/users/" + test_user_success_two['username'],
                       headers={'Authorization': access_token},
                       json=test_user_success_two)
-    assert resp.status_code == 200
+    assert resp.status_code == SUCCESS_OK
 
     test_user_success_two['password_confirmed'] = 'test'
     resp = client.put("/users/" + test_user_success_two['username'],
                       headers={'Authorization': access_token},
                       json=test_user_success_two)
-    assert resp.status_code == 401
+    assert resp.status_code == ERROR_BAD_REQUEST
 
     # after test update user info, delete test_user_success_two
     resp = client.delete("/users/" + test_user_success_two['username'],
                          headers={'Authorization': access_token})
-    assert resp.status_code == 200
+    assert resp.status_code == SUCCESS_OK
