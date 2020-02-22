@@ -7,7 +7,9 @@ from apps.account.views import api, login_parser
 from datetime import datetime
 from apps.utils.response import success_response, fail_response
 
+
 ns_auth = api.namespace('auth')
+
 
 @ns_auth.route('/login')
 class Login(Resource):

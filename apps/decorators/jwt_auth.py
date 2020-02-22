@@ -5,6 +5,8 @@ import time
 from apps.jwt.views import decrypt_jwt
 from apps.models.database import get_session
 from apps.models.user import User
+from apps.utils.response import fail_response
+from apps.utils.status_code import ERROR_UNAUTHORIZED
 
 
 def jwt_token_required(f):
@@ -12,31 +14,23 @@ def jwt_token_required(f):
     def decorated_function(*args, **kwargs):
         token = request.headers.get('Authorization', None)
         if token is None:
-            return make_response(jsonify({
-                'msg': "Token is not given",
-            }), 401)
+            return fail_response("Token is not given")
         try:
             decoded_token = decrypt_jwt(token)
         except Exception as e:
             print(e)
-            return make_response(jsonify({
-                'msg': "Invalid token given",
-            }), 401)
+            return fail_response("Invalid token given", ERROR_UNAUTHORIZED)
 
         db = get_session('flask-jwt-auth')
         username = decoded_token['username']
 
         auth_user = db.query(User).filter_by(username=username).first()
         if auth_user is None:
-            return make_response(jsonify({
-                'msg': "Invalid token given",
-            }), 401)
+            return fail_response("Invalid token given", ERROR_UNAUTHORIZED)
 
         exp = decoded_token['exp']
         if exp < time.time():
-            return make_response(jsonify({
-                'msg': "Access token has been expired",
-            }), 401)
+            return fail_response('Access token has been expired', ERROR_UNAUTHORIZED)
 
         kwargs['jwt_username'] = username
         kwargs['jwt_exp'] = exp

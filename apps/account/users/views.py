@@ -6,7 +6,9 @@ from apps.models.database import get_session
 from apps.utils.validate import check_username, check_password, check_email
 from apps.utils.response import success_response, fail_response
 
+
 ns_users = api.namespace("users")
+
 
 @ns_users.route('')
 class Home(Resource):
@@ -73,6 +75,7 @@ class Home(Resource):
             'created_on': new_user.created_on
             }
         return success_response(data)
+
 
 @ns_users.route('/<username>')
 class Username(Resource):
@@ -144,7 +147,5 @@ class Username(Resource):
             except:
                 db.rollback()
                 return fail_response(f'Error while deleting user {username}')
-
             return success_response({'deleted_user': username}, f'success. delete uesr {username}')
-
         return fail_response('Not Permission')
