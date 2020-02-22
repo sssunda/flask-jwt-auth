@@ -76,7 +76,7 @@ def test_get_userinfo(client):
     resp = client.get("/users", headers={
         "Authorization": access_token
     })
-    assert resp.status_code == ERROR_BAD_REQUEST
+    assert resp.status_code == ERROR_UNAUTHORIZED
 
     resp = client.post("/auth/login", json=test_staff_user)
     access_token = json.loads(resp.data.decode("utf-8"))['data']['access_token']

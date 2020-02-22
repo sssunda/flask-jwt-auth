@@ -5,6 +5,7 @@ from apps.models.user import User
 from apps.models.database import get_session
 from apps.utils.validate import check_username, check_password, check_email
 from apps.utils.response import success_response, fail_response
+from apps.utils.status_code import ERROR_UNAUTHORIZED
 
 
 ns_users = api.namespace("users")
@@ -16,7 +17,7 @@ class Home(Resource):
     def get(self, **kwargs):
         auth_user = kwargs['auth_user']
         if not auth_user.is_staff:
-            return fail_response('Not Permission. Only Staff')
+            return fail_response('Not Permission. Only Staff', ERROR_UNAUTHORIZED)
         db = get_session('flask-jwt-auth')
         user_list = db.query(User).all()
 
@@ -98,7 +99,7 @@ class Username(Resource):
                 return success_response(data)
             else:
                 return fail_response(f'No entry for username. {username}')
-        return fail_response('Not Permission')
+        return fail_response('Not Permission', ERROR_UNAUTHORIZED)
 
     @jwt_token_required
     def put(self, username, **kwargs):
@@ -133,7 +134,7 @@ class Username(Resource):
                 'last_login': user.last_login
             }
             return success_response(data)
-        return fail_response('Not Permission')
+        return fail_response('Not Permission', ERROR_UNAUTHORIZED)
 
     @jwt_token_required
     def delete(self, username, **kwargs):
@@ -148,4 +149,4 @@ class Username(Resource):
                 db.rollback()
                 return fail_response(f'Error while deleting user {username}')
             return success_response({'deleted_user': username}, f'success. delete uesr {username}')
-        return fail_response('Not Permission')
+        return fail_response('Not Permission', ERROR_UNAUTHORIZED)
