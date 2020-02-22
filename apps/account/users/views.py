@@ -15,9 +15,9 @@ class Home(Resource):
     def get(self, **kwargs):
         auth_user = kwargs['auth_user']
         if not auth_user.is_staff:
-            return jsonify({
+            return make_response(jsonify({
                 'msg': 'Not Permission. Only Staff'
-            })
+            }), 401)
         db = get_session('flask-jwt-auth')
         user_list = db.query(User).all()
 
@@ -31,10 +31,10 @@ class Home(Resource):
                 'last_login': user.last_login,
                 'is_staff': user.is_staff
             })
-        return jsonify({
+        return make_response(jsonify({
                 'msg': 'success',
                 'data': data
-        })
+        }), 200)
     def post(self):
         parser = create_parser
         args = parser.parse_args()
@@ -128,64 +128,66 @@ class Username(Resource):
         auth_user = kwargs['auth_user']
         parser = update_parser
         args = parser.parse_args()
-        if kwargs['jwt_username'] != username or not auth_user.is_staff:
-            return make_response(jsonify({
-                'msg': 'Not Permission'
-            }), 401)
-        try:
-            db = get_session('flask-jwt-auth')
-            user = db.query(User).filter_by(username=username).first()
+        if kwargs['jwt_username'] == username or auth_user.is_staff:
+            try:
+                db = get_session('flask-jwt-auth')
+                user = db.query(User).filter_by(username=username).first()
 
-            is_valid, err_msg = check_password(args['password'], args['password_confirmed'])
-            if not is_valid:
+                is_valid, err_msg = check_password(args['password'], args['password_confirmed'])
+                if not is_valid:
+                    return make_response(jsonify({
+                        'msg': err_msg
+                    }), 401)
+
+                is_valid, err_msg = check_email(args['email'])
+                if not is_valid:
+                    return make_response(jsonify({
+                        'msg': err_msg
+                    }), 401)
+
+                user.set_password(args['password'])
+                user.email = args['email']
+                db.commit()
+            except Exception as e:
+                print(e)
+                db.rollback()
                 return make_response(jsonify({
-                    'msg': err_msg
+                    'msg': 'Error while update user info'
                 }), 401)
-
-            is_valid, err_msg = check_email(args['email'])
-            if not is_valid:
-                return make_response(jsonify({
-                    'msg': err_msg
-                }), 401)
-
-            user.set_password(args['password'])
-            user.email = args['email']
-            db.commit()
-        except Exception as e:
-            print(e)
-            db.rollback()
+            data = {
+                'id': user.id,
+                'username': user.username,
+                'email': user.email,
+                'created_on': user.created_on,
+                'last_login': user.last_login
+            }
             return make_response(jsonify({
-                'msg': 'Error while update user info'
-            }), 401)
-        data = {
-            'id': user.id,
-            'username': user.username,
-            'email': user.email,
-            'created_on': user.created_on,
-            'last_login': user.last_login
-        }
+                'msg': 'success',
+                'data': data
+            }), 200)
         return make_response(jsonify({
-            'msg': 'success',
-            'data': data
-        }), 200)
+            'msg': 'Not Permission'
+        }), 401)
 
     @jwt_token_required
     def delete(self, username, **kwargs):
         auth_user = kwargs['auth_user']
-        if kwargs['jwt_username'] != username or not auth_user.is_staff:
+
+        if kwargs['jwt_username'] == username or auth_user.is_staff:
+            try:
+                db = get_session('flask-jwt-auth')
+                db.query(User).filter_by(username=username).delete()
+                db.commit()
+            except:
+                db.rollback()
+                return make_response(jsonify({
+                    'msg': 'Error while deleting user {}'.format(username)
+                }), 401)
+
             return make_response(jsonify({
-                'msg': 'Not Permission'
-            }), 401)
-        try:
-            db = get_session('flask-jwt-auth')
-            db.query(User).filter_by(username=username).delete()
-            db.commit()
-        except:
-            db.rollback()
-            return make_response(jsonify({
-                'msg': 'Error while deleting user {}'.format(username)
-            }), 401)
+                'msg': 'success. delete uesr {}'.format(username)
+            }), 200)
 
         return make_response(jsonify({
-            'msg': 'success. delete uesr {}'.format(username)
-        }), 200)
+            'msg': 'Not Permission'
+        }), 401)
