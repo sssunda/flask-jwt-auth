@@ -16,7 +16,7 @@ def init_db():
     Base.query = db_session.query_property()
     Base.metadata.create_all(engine)
 
-def get_session(db_name):
+def get_session(db_name=db_name):
     db = db_sessions.get(db_name)
     if db is None:
         return 'Error'

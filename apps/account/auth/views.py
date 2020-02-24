@@ -18,7 +18,7 @@ class Login(Resource):
         args = parser.parse_args()
 
         try:
-            db = get_session('flask-jwt-auth')
+            db = get_session()
             data = db.query(User).filter_by(username=args['username']).first()
             if data is not None:
                 if data.check_password(args['password']):
@@ -29,6 +29,8 @@ class Login(Resource):
                     except:
                         db.rollback()
                     return success_response({'access_token': access_token})
+                return fail_response({'msg': 'Invalid password'})
+            return fail_response({'msg': 'Invalid user'})
         except Exception as e:
             return {'error': str(e)}
 
@@ -39,8 +41,8 @@ class Me(Resource):
     def get(self, **kwargs):
         auth_user = kwargs['auth_user']
         data = {
-            'id' : auth_user.id,
-            'username' : auth_user.username,
+            'id': auth_user.id,
+            'username': auth_user.username,
             'email': auth_user.email,
             'created_on': auth_user.created_on,
             'token_iat': kwargs['jwt_iat'],

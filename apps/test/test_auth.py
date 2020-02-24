@@ -3,9 +3,6 @@ from apps.test.conftest import client
 from apps.utils.status_code import SUCCESS_OK, ERROR_BAD_REQUEST, ERROR_UNAUTHORIZED
 
 
-test_config = {
-    'DB_URL':'sqlite:///flask-jwt-auth.db'
-}
 test_user = {
     'username': "test_user_1",
     'password': "test"

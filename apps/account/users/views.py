@@ -18,7 +18,7 @@ class Home(Resource):
         auth_user = kwargs['auth_user']
         if not auth_user.is_staff:
             return fail_response('Not Permission. Only Staff', ERROR_UNAUTHORIZED)
-        db = get_session('flask-jwt-auth')
+        db = get_session()
         user_list = db.query(User).all()
 
         data = list()
@@ -38,7 +38,7 @@ class Home(Resource):
         args = parser.parse_args()
 
         try:
-            db = get_session('flask-jwt-auth')
+            db = get_session()
             if db.query(User).filter_by(username=args['username']).first():
                 return fail_response('Already existed username')
             
@@ -84,7 +84,7 @@ class Username(Resource):
     def get(self, username, **kwargs):
         auth_user = kwargs['auth_user']
         if auth_user.is_staff or kwargs['jwt_username'] == username:
-            db = get_session('flask-jwt-auth')
+            db = get_session()
             user = db.query(User).filter_by(username=username).first()
 
             if user:
@@ -108,7 +108,7 @@ class Username(Resource):
         args = parser.parse_args()
         if kwargs['jwt_username'] == username or auth_user.is_staff:
             try:
-                db = get_session('flask-jwt-auth')
+                db = get_session()
                 user = db.query(User).filter_by(username=username).first()
 
                 is_valid, err_msg = check_password(args['password'], args['password_confirmed'])
@@ -142,11 +142,11 @@ class Username(Resource):
 
         if kwargs['jwt_username'] == username or auth_user.is_staff:
             try:
-                db = get_session('flask-jwt-auth')
+                db = get_session()
                 db.query(User).filter_by(username=username).delete()
                 db.commit()
             except:
                 db.rollback()
                 return fail_response(f'Error while deleting user {username}')
-            return success_response({'deleted_user': username}, f'success. delete uesr {username}')
+            return success_response({'deleted_user': username}, f'success. delete user {username}')
         return fail_response('Not Permission', ERROR_UNAUTHORIZED)
