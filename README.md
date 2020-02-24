@@ -12,10 +12,11 @@ Project for JWT authentication with Flask framework
 ## Todo list
 - [x] Flask Tutorials
 - [x] Create user model
-- [ ] Create login function 
-- [ ] Create Login Page
-- [ ] Rest Framework
-- [ ] JWT Token
-- [ ] auth API
-- [ ] user API
-- [ ] Unit Test
+- [x] Create login function 
+- [x] Create Login Page
+- [x] Rest Framework
+- [x] JWT Token
+- [x] auth API
+- [x] user API
+- [x] Unit Test
+- [ ] Logging
