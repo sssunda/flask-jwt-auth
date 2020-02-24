@@ -6,6 +6,7 @@ from apps.decorators.jwt_auth import jwt_token_required
 from apps.account.views import api, login_parser
 from datetime import datetime
 from apps.utils.response import success_response, fail_response
+import logging
 
 
 ns_auth = api.namespace('auth')
