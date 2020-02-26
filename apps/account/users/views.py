@@ -7,7 +7,6 @@ from apps.utils.validate import check_username, check_password, check_email
 from apps.utils.response import success_response, fail_response
 from apps.utils.status_code import ERROR_UNAUTHORIZED
 
-
 ns_users = api.namespace("users")
 
 
@@ -17,6 +16,7 @@ class Home(Resource):
     def get(self, **kwargs):
         auth_user = kwargs['auth_user']
         if not auth_user.is_staff:
+            # TODO : edit msg
             return fail_response('Not Permission. Only Staff', ERROR_UNAUTHORIZED)
         db = get_session()
         user_list = db.query(User).all()
@@ -37,11 +37,11 @@ class Home(Resource):
         parser = create_parser
         args = parser.parse_args()
 
+        db = get_session()
         try:
-            db = get_session()
             if db.query(User).filter_by(username=args['username']).first():
                 return fail_response('Already existed username')
-            
+
             if db.query(User).filter_by(email=args['email']).first():
                 return fail_response('Already existed email')
 
@@ -63,18 +63,20 @@ class Home(Resource):
                 email=args['email']
             )
             db.add(user)
+            db.commit()
         except Exception as e:
             print(e)
+            # TODO : return None and log.error
             return db.rollback()
 
-        db.commit()
+        # TODO : delete new_user
         new_user = db.query(User).filter_by(username=args['username']).first()
         data = {
             'id': new_user.id,
             'username': new_user.username,
             'email': new_user.email,
             'created_on': new_user.created_on
-            }
+        }
         return success_response(data)
 
 
@@ -106,47 +108,51 @@ class Username(Resource):
         auth_user = kwargs['auth_user']
         parser = update_parser
         args = parser.parse_args()
-        if kwargs['jwt_username'] == username or auth_user.is_staff:
-            try:
-                db = get_session()
-                user = db.query(User).filter_by(username=username).first()
 
-                is_valid, err_msg = check_password(args['password'], args['password_confirmed'])
-                if not is_valid:
-                    return fail_response(err_msg)
+        if kwargs['jwt_username'] != username and not auth_user.is_staff:
+            return fail_response('Not Permission', ERROR_UNAUTHORIZED)
 
-                is_valid, err_msg = check_email(args['email'])
-                if not is_valid:
-                    return fail_response(err_msg)
+        db = get_session()
+        try:
+            user = db.query(User).filter_by(username=username).first()
 
-                user.set_password(args['password'])
-                user.email = args['email']
-                db.commit()
-            except Exception as e:
-                print(e)
-                db.rollback()
-                return fail_response('Error while update user info')
-            data = {
-                'id': user.id,
-                'username': user.username,
-                'email': user.email,
-                'created_on': user.created_on,
-                'last_login': user.last_login
-            }
-            return success_response(data)
-        return fail_response('Not Permission', ERROR_UNAUTHORIZED)
+            is_valid, err_msg = check_password(args['password'], args['password_confirmed'])
+            if not is_valid:
+                return fail_response(err_msg)
+
+            is_valid, err_msg = check_email(args['email'])
+            if not is_valid:
+                return fail_response(err_msg)
+
+            user.set_password(args['password'])
+            user.email = args['email']
+            db.commit()
+        except Exception as e:
+            # TODO : log.error
+            print(e)
+            db.rollback()
+            return fail_response('Error while update user info')
+        data = {
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'created_on': user.created_on,
+            'last_login': user.last_login
+        }
+        return success_response(data)
 
     @jwt_token_required
     def delete(self, username, **kwargs):
         auth_user = kwargs['auth_user']
 
-        if kwargs['jwt_username'] == username or auth_user.is_staff:
-            try:
-                db = get_session()
-                db.query(User).filter_by(username=username).delete()
-                db.commit()
-            except:
-                db.rollback()
-                return fail_response(f'Error while deleting user {username}')
-            return success_response({'deleted_user': username}, f'success. delete user {username}')
-        return fail_response('Not Permission', ERROR_UNAUTHORIZED)
+        if kwargs['jwt_username'] != username and not auth_user.is_staff:
+            return fail_response('Not Permission', ERROR_UNAUTHORIZED)
+
+        db = get_session()
+        try:
+            db.query(User).filter_by(username=username).delete()
+            db.commit()
+        except:
+            db.rollback()
+            return fail_response(f'Error while deleting user {username}')
+        return success_response({'deleted_user': username}, f'success. delete user {username}')

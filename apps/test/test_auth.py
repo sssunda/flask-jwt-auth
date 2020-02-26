@@ -51,7 +51,7 @@ def test_refresh(client):
     new_access_token = json.loads(resp.data.decode("utf-8"))['data']['access_token']
     assert new_access_token
 
-    # access_toekn compare with new_access_token
+    # access_token compare with new_access_token
     assert access_token != new_access_token
 
     # test refresh not given access_token

@@ -8,7 +8,6 @@ from datetime import datetime
 from apps.utils.response import success_response, fail_response
 import logging
 
-
 ns_auth = api.namespace('auth')
 
 
@@ -16,6 +15,7 @@ ns_auth = api.namespace('auth')
 class Login(Resource):
     def post(self):
         parser = login_parser
+        # TODO : exception control
         args = parser.parse_args()
 
         try:
@@ -25,7 +25,8 @@ class Login(Resource):
                 if data.check_password(args['password']):
                     access_token = encrypt_jwt(args['username'])
                     try:
-                        db.query(User).filter_by(username=args['username']).update({'last_login': datetime.now()})
+                        db.query(User).filter_by(username=args['username']).update(
+                            {'last_login': datetime.now()})
                         db.commit()
                     except:
                         db.rollback()
@@ -33,6 +34,7 @@ class Login(Resource):
                 return fail_response({'msg': 'Invalid password'})
             return fail_response({'msg': 'Invalid user'})
         except Exception as e:
+            # TODO : Return Internal Server Error and log.error
             return {'error': str(e)}
 
 
