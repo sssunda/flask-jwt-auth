@@ -1,10 +1,16 @@
+# Third Party Module Import
 import jwt
+
+# Python Module Import
 import time
 
-# jwt setting
-JWT_EXP_PERIOD = 3600
-JWT_ALGO = "HS256"
-JWT_SECRET_KEY = "super secret key"
+# Apps Module Import
+from apps.utils.get_config import get_config
+
+
+jwt_exp_period = get_config('JWT_EXP_PERIOD')
+jwt_algo = get_config('JWT_ALGO')
+jwt_secret_key = get_config('JWT_SECRET_KEY')
 
 
 def encrypt_jwt(username):
@@ -12,10 +18,10 @@ def encrypt_jwt(username):
     payload = {
         'username': username,
         'iat': iat,
-        'exp': iat + JWT_EXP_PERIOD
+        'exp': iat + jwt_exp_period
     }
-    return jwt.encode(payload, JWT_SECRET_KEY, algorithm=JWT_ALGO).decode("utf-8")
+    return jwt.encode(payload, jwt_secret_key, algorithm=jwt_algo).decode("utf-8")
 
 
 def decrypt_jwt(token):
-    return jwt.decode(token, JWT_SECRET_KEY, algorithm=JWT_ALGO)
+    return jwt.decode(token, jwt_secret_key, algorithm=jwt_algo)

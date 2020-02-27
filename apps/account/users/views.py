@@ -1,13 +1,33 @@
-from flask_restplus import Resource
+# Third Party Module Import
+from flask_restplus import Resource, reqparse
+
+# Python Module Import
+import logging
+
+# Apps Module Import
 from apps.decorators.jwt_auth import jwt_token_required
-from apps.account.views import api, create_parser, update_parser
+from apps.account.views import api
 from apps.models.user import User
 from apps.models.database import get_session
 from apps.utils.validate import check_username, check_password, check_email
 from apps.utils.response import success_response, fail_response
 from apps.utils.status_code import ERROR_UNAUTHORIZED
 
+
 ns_users = api.namespace("users")
+
+# create parser
+create_parser = reqparse.RequestParser()
+create_parser.add_argument('username', required=True)
+create_parser.add_argument('password', required=True)
+create_parser.add_argument('password_confirmed', required=True)
+create_parser.add_argument('email', required=True)
+
+# update parser
+update_parser = reqparse.RequestParser()
+update_parser.add_argument('password', required=True)
+update_parser.add_argument('password_confirmed', required=True)
+update_parser.add_argument('email', required=True)
 
 
 @ns_users.route('')
@@ -16,8 +36,7 @@ class Home(Resource):
     def get(self, **kwargs):
         auth_user = kwargs['auth_user']
         if not auth_user.is_staff:
-            # TODO : edit msg
-            return fail_response('Not Permission. Only Staff', ERROR_UNAUTHORIZED)
+            return fail_response('Not Permission', ERROR_UNAUTHORIZED)
         db = get_session()
         user_list = db.query(User).all()
 
@@ -34,8 +53,7 @@ class Home(Resource):
         return success_response(data)
 
     def post(self):
-        parser = create_parser
-        args = parser.parse_args()
+        args = create_parser.parse_args()
 
         db = get_session()
         try:
@@ -65,17 +83,15 @@ class Home(Resource):
             db.add(user)
             db.commit()
         except Exception as e:
-            print(e)
-            # TODO : return None and log.error
-            return db.rollback()
+            logging.error(e)
+            db.rollback()
+            return fail_response('Error while create user')
 
-        # TODO : delete new_user
-        new_user = db.query(User).filter_by(username=args['username']).first()
         data = {
-            'id': new_user.id,
-            'username': new_user.username,
-            'email': new_user.email,
-            'created_on': new_user.created_on
+            'id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'created_on': user.created_on
         }
         return success_response(data)
 
@@ -106,8 +122,7 @@ class Username(Resource):
     @jwt_token_required
     def put(self, username, **kwargs):
         auth_user = kwargs['auth_user']
-        parser = update_parser
-        args = parser.parse_args()
+        args = update_parser.parse_args()
 
         if kwargs['jwt_username'] != username and not auth_user.is_staff:
             return fail_response('Not Permission', ERROR_UNAUTHORIZED)
@@ -128,8 +143,7 @@ class Username(Resource):
             user.email = args['email']
             db.commit()
         except Exception as e:
-            # TODO : log.error
-            print(e)
+            logging.error(e)
             db.rollback()
             return fail_response('Error while update user info')
         data = {
@@ -152,7 +166,8 @@ class Username(Resource):
         try:
             db.query(User).filter_by(username=username).delete()
             db.commit()
-        except:
+        except Exception as e:
+            logging.error(e)
             db.rollback()
             return fail_response(f'Error while deleting user {username}')
         return success_response({'deleted_user': username}, f'success. delete user {username}')

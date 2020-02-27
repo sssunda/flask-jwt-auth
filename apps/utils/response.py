@@ -1,6 +1,11 @@
+# Third Party Module Import
 from flask import jsonify, make_response
-from apps.utils.status_code import SUCCESS_OK, ERROR_BAD_REQUEST
+
+# Python Module Import
 import logging
+
+# Apps Module Import
+from apps.utils.status_code import SUCCESS_OK, ERROR_BAD_REQUEST
 
 
 def success_response(data, msg=None, status=SUCCESS_OK):

@@ -1,6 +1,11 @@
+# Third Party Module Import
 import pytest
+
+# Python Module Import
 import tempfile
 import json
+
+# Apps Module Import
 from apps.test.conftest import client
 from apps.utils.status_code import SUCCESS_OK, ERROR_BAD_REQUEST, ERROR_UNAUTHORIZED
 
@@ -9,7 +14,7 @@ test_user_success_one = {
     'password': 'testtest',
     'password_confirmed': 'testtest',
     'email': 'testuser@test.com'
-    }
+}
 
 test_user_success_two = {
     'username': 'testuser2',

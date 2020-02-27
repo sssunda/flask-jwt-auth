@@ -1,4 +1,7 @@
+# Python Module Import
 import json
+
+# Apps Module Import
 from apps.test.conftest import client
 from apps.utils.status_code import SUCCESS_OK, ERROR_BAD_REQUEST, ERROR_UNAUTHORIZED
 

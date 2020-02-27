@@ -1,7 +1,13 @@
+# Third Party Module Import
 from flask import request, jsonify, make_response
+
+# Python Module Import
 from functools import wraps
 import jwt
 import time
+import logging
+
+# Apps Module Import
 from apps.jwt.views import decrypt_jwt
 from apps.models.database import get_session
 from apps.models.user import User
@@ -18,7 +24,7 @@ def jwt_token_required(f):
         try:
             decoded_token = decrypt_jwt(token)
         except Exception as e:
-            print(e)
+            logging.error(e)
             return fail_response("Invalid token given", ERROR_UNAUTHORIZED)
 
         db = get_session('flask-jwt-auth')

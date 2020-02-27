@@ -1,3 +1,4 @@
+# Python Module Import
 import re
 
 
@@ -14,7 +15,8 @@ def check_username(username):
     # check Uppercase
     regex = r"^[a-z0-9]*$"
     if re.match(regex, username) is None:
-        err_msg += "Contains invalid character(Do not allows uppercase and special characters in username)\n"
+        err_msg += "Contains invalid character(Do not allows uppercase and special characters in " \
+                   "username)\n"
         is_valid = False
 
     # check only number

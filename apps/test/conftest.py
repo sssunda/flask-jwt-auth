@@ -1,8 +1,12 @@
+# Third Party Module Import
 import pytest
+
+# Python Module Import
 import tempfile
+
+# Apps Module Import
 from apps import create_app
 from apps.models.database import init_db
-
 
 
 @pytest.fixture(scope='session')
