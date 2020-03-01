@@ -8,12 +8,12 @@ import time
 from apps.utils.get_config import get_config
 
 
-jwt_exp_period = get_config('JWT_EXP_PERIOD')
-jwt_algo = get_config('JWT_ALGO')
-jwt_secret_key = get_config('JWT_SECRET_KEY')
-
 
 def encrypt_jwt(username):
+    jwt_exp_period = get_config('JWT_EXP_PERIOD')
+    jwt_algo = get_config('JWT_ALGO')
+    jwt_secret_key = get_config('JWT_SECRET_KEY')
+
     iat = time.time()
     payload = {
         'username': username,
@@ -24,4 +24,6 @@ def encrypt_jwt(username):
 
 
 def decrypt_jwt(token):
+    jwt_algo = get_config('JWT_ALGO')
+    jwt_secret_key = get_config('JWT_SECRET_KEY')
     return jwt.decode(token, jwt_secret_key, algorithm=jwt_algo)

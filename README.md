@@ -19,4 +19,3 @@ Project for JWT authentication with Flask framework
 - [x] auth API
 - [x] user API
 - [x] Unit Test
-- [ ] Logging

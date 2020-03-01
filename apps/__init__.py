@@ -2,16 +2,17 @@
 from flask import Flask, Blueprint
 
 # Apps Module Import
-from apps.models.database import init_db, init_create_user
 from apps.account.views import api
 from apps.account.auth.views import ns_auth
 from apps.account.users.views import ns_users
-from apps.utils.get_config import get_config
+from apps.models.database import init_db, init_create_user
 
 def create_app():
-    app = Flask(__name__, instance_relative_config=True)
-    app.config.from_object('configs.config')
-    init_db()
+    app = Flask(__name__)
+    app.config.from_pyfile("./configs/config.py")
+
+    with app.app_context():
+        init_db()
     # create test_user
     # init_create_user()
 
@@ -20,8 +21,5 @@ def create_app():
     api.add_namespace(ns_auth)
     api.add_namespace(ns_users)
     app.register_blueprint(blueprint)
-
-    secret_key = get_config('APP_SECRET_KEY')
-    app.secret_key = secret_key
 
     return app

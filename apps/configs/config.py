@@ -1,3 +1,4 @@
+# class Config(object):
 # DB
 DATABASE = 'flask-jwt-auth.db'
 

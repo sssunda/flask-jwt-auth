@@ -6,7 +6,7 @@ import tempfile
 
 # Apps Module Import
 from apps import create_app
-from apps.models.database import init_db
+from apps.models.database import init_db, init_create_user
 
 
 @pytest.fixture(scope='session')
@@ -18,4 +18,5 @@ def client():
     with app.test_client() as client:
         with app.app_context():
             init_db()
+            init_create_user()
         yield client
